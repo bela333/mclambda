@@ -2,7 +2,8 @@
 
 module Main where
 
-import Data.Map (Map, empty, insert, union, (!))
+import Data.List (intercalate)
+import Data.Map (Map, empty, insert, toList, union)
 import System.Environment (getArgs)
 import Text.Parsec hiding (tokens)
 import Text.Parsec.String (Parser, parseFromFile)
@@ -54,33 +55,24 @@ parseTop = do
   tokens <- many1 parseToken
   return (indirectCount, tokens)
 
--- data Token = CombOp String | RefOp Int | IndOp Int | ApOp | RetOp deriving (Show)
--- data Tree = Ap Tree Tree | Lit String | Indirect Int | Reference Int deriving (Show)
-
 createTree :: [Token] -> [Tree] -> Tree
 createTree ((CombOp comb) : ts) stack = createTree ts (Lit comb : stack)
 createTree ((RefOp num) : ts) (tree : stack) = createTree ts (Reference num tree : stack)
 createTree ((IndOp num) : ts) stack = createTree ts (Indirect num : stack)
 createTree (ApOp : ts) (tree1 : tree2 : stack) = createTree ts (Ap tree2 tree1 : stack)
-createTree (RetOp : ts) (tree : _) = tree
+createTree (RetOp : _) (tree : _) = tree
 createTree ops start = error $ "createTree error: " ++ show (ops, start)
 
 findIndirect :: Tree -> Map Int Tree
 findIndirect (Ap t1 t2) = findIndirect t1 `union` findIndirect t2
-findIndirect (Lit l) = empty
-findIndirect (Indirect num) = empty
+findIndirect (Lit _) = empty
+findIndirect (Indirect _) = empty
 findIndirect (Reference num t) = insert num t $ findIndirect t
-
-derefIndirect :: Tree -> Map Int Tree -> Tree
-derefIndirect (Ap t1 t2) m = derefIndirect t1 m `Ap` derefIndirect t2 m
-derefIndirect (Lit l) m = Lit l
-derefIndirect (Indirect num) m = derefIndirect (m ! num) m
-derefIndirect (Reference num t) m = derefIndirect t m
 
 minecraftify :: Tree -> String
 minecraftify (Ap t1 t2) = "[0," ++ minecraftify t1 ++ "," ++ minecraftify t2 ++ "]"
-minecraftify (Indirect num) = error "Indirect used in minecraftify"
-minecraftify (Reference num t) = error "Reference used in minecraftify"
+minecraftify (Indirect num) = "[22, " ++ show num ++ "]"
+minecraftify (Reference num _) = "[22, " ++ show num ++ "]"
 minecraftify (Lit "S") = "[1]"
 minecraftify (Lit "K") = "[2]"
 minecraftify (Lit "I") = "[3]"
@@ -106,12 +98,12 @@ main :: IO ()
 main = do
   (filename : _) <- getArgs
   parseRes <- parseFromFile parseTop filename
-  print parseRes
   let Right (_, parsed) = parseRes
   let tree = createTree parsed []
   let indirections = findIndirect tree
-  let direct = derefIndirect tree indirections
-  print tree
-  print indirections
-  print direct
-  putStrLn $ minecraftify direct
+  let result = minecraftify tree
+  let hackForNat = "[0,[0," ++ result ++ ",[5]],[4,0]]"
+  let shared = intercalate "," $ map (\(num, indirectTree) -> show num ++ ":" ++ minecraftify indirectTree) (toList indirections)
+  putStrLn $ "data modify storage lambda:lambda current set value " ++ hackForNat
+  putStrLn $ "data modify storage lambda:lambda sharing set value {" ++ shared ++ "}"
+  return ()
