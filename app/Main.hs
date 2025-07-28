@@ -8,7 +8,9 @@ import System.Environment (getArgs)
 import Text.Parsec hiding (tokens)
 import Text.Parsec.String (Parser, parseFromFile)
 
-data Tree = Ap Tree Tree | Lit String | Indirect Int | Reference Int Tree deriving (Show)
+-- Indirect/IndOp: Reference to shared tree
+-- Reference/RefOp: Creates new shared tree
+data AST = Ap AST AST | Comb String | Indirect Int | Reference Int AST deriving (Show)
 data Token = CombOp String | RefOp Int | IndOp Int | ApOp | RetOp deriving (Show)
 
 type IndirectCount = Int
@@ -50,60 +52,66 @@ parseTop :: Parser (IndirectCount, [Token])
 parseTop = do
   string' "v8.2"
   endOfLine
-  indirectCount :: Int <- read <$> many alphaNum
+  indirectCount :: IndirectCount <- read <$> many alphaNum
   endOfLine
   tokens <- many1 parseToken
   return (indirectCount, tokens)
 
-createTree :: [Token] -> [Tree] -> Tree
-createTree ((CombOp comb) : ts) stack = createTree ts (Lit comb : stack)
-createTree ((RefOp num) : ts) (tree : stack) = createTree ts (Reference num tree : stack)
-createTree ((IndOp num) : ts) stack = createTree ts (Indirect num : stack)
-createTree (ApOp : ts) (tree1 : tree2 : stack) = createTree ts (Ap tree2 tree1 : stack)
-createTree (RetOp : _) (tree : _) = tree
-createTree ops start = error $ "createTree error: " ++ show (ops, start)
+-- Convert parsed content to AST from RPN.
+createAST :: [Token] -> [AST] -> AST
+createAST ((CombOp comb) : ts) stack = createAST ts (Comb comb : stack)
+createAST ((RefOp num) : ts) (tree : stack) = createAST ts (Reference num tree : stack)
+createAST ((IndOp num) : ts) stack = createAST ts (Indirect num : stack)
+createAST (ApOp : ts) (tree1 : tree2 : stack) = createAST ts (Ap tree2 tree1 : stack)
+createAST (RetOp : _) (tree : _) = tree
+createAST ops start = error $ "createAST error: " ++ show (ops, start)
 
-findIndirect :: Tree -> Map Int Tree
-findIndirect (Ap t1 t2) = findIndirect t1 `union` findIndirect t2
-findIndirect (Lit _) = empty
-findIndirect (Indirect _) = empty
-findIndirect (Reference num t) = insert num t $ findIndirect t
+-- Find all shared reference creations in AST
+findReference :: AST -> Map Int AST
+findReference (Ap t1 t2) = findReference t1 `union` findReference t2
+findReference (Comb _) = empty
+findReference (Indirect _) = empty
+findReference (Reference num t) = insert num t $ findReference t
 
-minecraftify :: Tree -> String
+-- Turn AST into SNBT used by datapack
+minecraftify :: AST -> String
 minecraftify (Ap t1 t2) = "[0," ++ minecraftify t1 ++ "," ++ minecraftify t2 ++ "]"
 minecraftify (Indirect num) = "[22, " ++ show num ++ "]"
 minecraftify (Reference num _) = "[22, " ++ show num ++ "]"
-minecraftify (Lit "S") = "[1]"
-minecraftify (Lit "K") = "[2]"
-minecraftify (Lit "I") = "[3]"
-minecraftify (Lit "S'") = "[6]"
-minecraftify (Lit "A") = "[7]"
-minecraftify (Lit "U") = "[8]"
-minecraftify (Lit "Y") = "[9]"
-minecraftify (Lit "B") = "[10]"
-minecraftify (Lit "B'") = "[11]"
-minecraftify (Lit "Z") = "[12]"
-minecraftify (Lit "C") = "[13]"
-minecraftify (Lit "C'") = "[14]"
-minecraftify (Lit "P") = "[15]"
-minecraftify (Lit "R") = "[16]"
-minecraftify (Lit "O") = "[17]"
-minecraftify (Lit "K2") = "[18]"
-minecraftify (Lit "K3") = "[19]"
-minecraftify (Lit "K4") = "[20]"
-minecraftify (Lit "C'B") = "[21]"
-minecraftify (Lit l) = error "Unknown literal: " ++ l
+minecraftify (Comb "S") = "[1]"
+minecraftify (Comb "K") = "[2]"
+minecraftify (Comb "I") = "[3]"
+minecraftify (Comb "S'") = "[6]"
+minecraftify (Comb "A") = "[7]"
+minecraftify (Comb "U") = "[8]"
+minecraftify (Comb "Y") = "[9]"
+minecraftify (Comb "B") = "[10]"
+minecraftify (Comb "B'") = "[11]"
+minecraftify (Comb "Z") = "[12]"
+minecraftify (Comb "C") = "[13]"
+minecraftify (Comb "C'") = "[14]"
+minecraftify (Comb "P") = "[15]"
+minecraftify (Comb "R") = "[16]"
+minecraftify (Comb "O") = "[17]"
+minecraftify (Comb "K2") = "[18]"
+minecraftify (Comb "K3") = "[19]"
+minecraftify (Comb "K4") = "[20]"
+minecraftify (Comb "C'B") = "[21]"
+minecraftify (Comb l) = error "Unknown literal: " ++ l
 
 main :: IO ()
 main = do
   (filename : _) <- getArgs
   parseRes <- parseFromFile parseTop filename
   let Right (_, parsed) = parseRes
-  let tree = createTree parsed []
-  let indirections = findIndirect tree
-  let result = minecraftify tree
-  let hackForNat = "[0,[0," ++ result ++ ",[5]],[4,0]]"
-  let shared = intercalate "," $ map (\(num, indirectTree) -> show num ++ ":" ++ minecraftify indirectTree) (toList indirections)
+  let ast = createAST parsed []
+  let astsnbt = minecraftify ast
+  -- Give `succ` as `zero` to `main`. Temporary
+  let hackForNat = "[0,[0," ++ astsnbt ++ ",[5]],[4,0]]"
+  -- Map of shared trees
+  let shared = findReference ast
+  -- SNBT object containing all shared trees along with their indices
+  let sharingsnbt = intercalate "," $ map (\(num, indirectTree) -> show num ++ ":" ++ minecraftify indirectTree) (toList shared)
   putStrLn $ "data modify storage lambda:lambda current set value " ++ hackForNat
-  putStrLn $ "data modify storage lambda:lambda sharing set value {" ++ shared ++ "}"
+  putStrLn $ "data modify storage lambda:lambda sharing set value {" ++ sharingsnbt ++ "}"
   return ()
