@@ -1,0 +1,1 @@
+#$tellraw @a {text:"$(text) ", extra:[{"storage":"lambda:lambda","nbt":"{}"}]}
