@@ -4,53 +4,78 @@ module Main where
 
 import Data.List (intercalate)
 import Data.Map (Map, empty, insert, toList, union)
+import GHC.IO.Handle.Types (Handle__ (Handle__))
 import System.Environment (getArgs)
 import Text.Parsec hiding (tokens)
 import Text.Parsec.String (Parser, parseFromFile)
 
 -- Indirect/IndOp: Reference to shared tree
 -- Reference/RefOp: Creates new shared tree
-data AST = Ap AST AST | Comb String | Indirect Int | Reference Int AST | Number Int deriving (Show)
-data Token = CombOp String | RefOp Int | IndOp Int | ApOp | RetOp | NumOp Int deriving (Show)
+data AST = Ap AST AST | Comb String | Indirect Int | Reference Int AST | Number Int | StringNode String deriving (Show)
+data Token = CombTok String | RefTok Int | IndTok Int | ApTok | RetTok | NumTok Int | StringLitTok String deriving (Show)
 
 type IndirectCount = Int
 
 parseInd :: Parser Token
 parseInd = do
-  string "_"
+  char '_'
   ref :: Int <- read <$> many digit
-  return $ IndOp ref
+  return $ IndTok ref
 
 parseRef :: Parser Token
 parseRef = do
-  string ":"
+  char ':'
   ref :: Int <- read <$> many digit
-  return $ RefOp ref
+  return $ RefTok ref
 
 parseAp :: Parser Token
 parseAp = do
-  string "@"
-  return ApOp
+  char '@'
+  return ApTok
 
 parseRet :: Parser Token
 parseRet = do
-  string "}"
-  return RetOp
+  char '}'
+  return RetTok
 
 parseNum :: Parser Token
 parseNum = do
   string "#"
   num :: Int <- read <$> many digit
-  return $ NumOp num
+  return $ NumTok num
 
 parseComb :: Parser Token
 parseComb = do
   combName <- manyTill anyToken (endOfLine <|> space)
-  return $ CombOp combName
+  return $ CombTok combName
+
+parseString :: Parser Token
+parseString = do
+  char '"'
+  content <- many parseStringChar
+  char '"'
+  return $ StringLitTok content
+ where
+  parseStringChar :: Parser Char
+  parseStringChar =
+    ( do
+        char '\\'
+        anyToken
+    )
+      -- TODO: Decode \ and ^ correctly.
+      <|> ( do
+              char '|'
+              anyToken
+          )
+      <|> ( do
+              char '^'
+              anyToken
+          )
+      <|> noneOf ['"']
 
 parseToken :: Parser Token
 parseToken = do
-  res <- parseInd <|> parseRef <|> parseAp <|> parseRet <|> parseNum <|> parseComb
+  res <- parseInd <|> parseRef <|> parseAp <|> parseRet <|> parseNum <|> parseString <|> parseComb
   spaces
   return res
 
@@ -65,12 +90,13 @@ parseTop = do
 
 -- Convert parsed content to AST from RPN.
 createAST :: [Token] -> [AST] -> AST
-createAST ((CombOp comb) : ts) stack = createAST ts (Comb comb : stack)
-createAST ((IndOp num) : ts) stack = createAST ts (Indirect num : stack)
-createAST (NumOp num : ts) stack = createAST ts (Number num : stack)
-createAST ((RefOp num) : ts) (tree : stack) = createAST ts (Reference num tree : stack)
-createAST (ApOp : ts) (tree1 : tree2 : stack) = createAST ts (Ap tree2 tree1 : stack)
-createAST (RetOp : _) (tree : _) = tree
+createAST (CombTok comb : ts) stack = createAST ts (Comb comb : stack)
+createAST (IndTok num : ts) stack = createAST ts (Indirect num : stack)
+createAST (NumTok num : ts) stack = createAST ts (Number num : stack)
+createAST (RefTok num : ts) (tree : stack) = createAST ts (Reference num tree : stack)
+createAST (StringLitTok str : ts) stack = createAST ts (StringNode str : stack)
+createAST (ApTok : ts) (tree1 : tree2 : stack) = createAST ts (Ap tree2 tree1 : stack)
+createAST (RetTok : _) (tree : _) = tree
 createAST ops start = error $ "createAST error: " ++ show (ops, start)
 
 -- Find all shared reference creations in AST
@@ -108,20 +134,34 @@ minecraftify (Comb "K4") = "[20]"
 minecraftify (Comb "C'B") = "[21]"
 minecraftify (Comb "+") = "[24]"
 minecraftify (Comb "*") = "[25]"
+minecraftify (Comb "-") = "[26]"
+minecraftify (Comb "==") = "[27]"
+minecraftify (Comb "<=") = "[28]"
+minecraftify (Comb "<") = "[29]"
+minecraftify (Comb ">=") = "[30]"
+minecraftify (Comb ">") = "[31]"
 -- minecraftify (Comb l) = error $ "Unknown literal: \"" ++ l ++ "\""
 minecraftify (Comb l) = "[23, " ++ show l ++ "]"
+minecraftify (StringNode str) = "[23, " ++ show ("Tried decoding string: " ++ str) ++ "]"
 
 main :: IO ()
 main = do
-  (filename : _) <- getArgs
-  parseRes <- parseFromFile parseTop filename
-  let Right (_, parsed) = parseRes
-  let ast = createAST parsed []
-  let astsnbt = minecraftify ast
-  -- Map of shared trees
-  let shared = findReference ast
-  -- SNBT object containing all shared trees along with their indices
-  let sharingsnbt = intercalate "," $ map (\(num, indirectTree) -> show num ++ ":" ++ minecraftify indirectTree) (toList shared)
-  putStrLn $ "data modify storage lambda:lambda current set value " ++ astsnbt
-  putStrLn $ "data modify storage lambda:lambda sharing set value {" ++ sharingsnbt ++ "}"
-  return ()
+  args <- getArgs
+  let (inputPath : _) = args
+  parseRes <- parseFromFile parseTop inputPath
+  case parseRes of
+    Left err -> print err
+    Right (_, parsed) -> do
+      let ast = createAST parsed []
+      let astsnbt = minecraftify ast
+      -- Map of shared trees
+      let shared = findReference ast
+      -- SNBT object containing all shared trees along with their indices
+      let sharingsnbt = intercalate "," $ map (\(num, indirectTree) -> show num ++ ":" ++ minecraftify indirectTree) (toList shared)
+      let currentcmb = "data modify storage lambda:lambda current set value " ++ astsnbt
+      let sharingcmb = "data modify storage lambda:lambda sharing set value {" ++ sharingsnbt ++ "}"
+      case args of
+        (_ : outputPath : _) -> writeFile outputPath (currentcmb ++ "\n" ++ sharingcmb)
+        _ -> do
+          putStrLn currentcmb
+          putStrLn sharingcmb
