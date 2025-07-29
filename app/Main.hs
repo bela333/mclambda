@@ -81,6 +81,8 @@ minecraftify (Reference num _) = "[22, " ++ show num ++ "]"
 minecraftify (Comb "S") = "[1]"
 minecraftify (Comb "K") = "[2]"
 minecraftify (Comb "I") = "[3]"
+minecraftify (Comb "zero") = "[4, 0]"
+minecraftify (Comb "succ") = "[5]"
 minecraftify (Comb "S'") = "[6]"
 minecraftify (Comb "A") = "[7]"
 minecraftify (Comb "U") = "[8]"
@@ -97,7 +99,7 @@ minecraftify (Comb "K2") = "[18]"
 minecraftify (Comb "K3") = "[19]"
 minecraftify (Comb "K4") = "[20]"
 minecraftify (Comb "C'B") = "[21]"
-minecraftify (Comb l) = error "Unknown literal: " ++ l
+minecraftify (Comb l) = error $ "Unknown literal: \"" ++ l ++ "\""
 
 main :: IO ()
 main = do
@@ -106,12 +108,10 @@ main = do
   let Right (_, parsed) = parseRes
   let ast = createAST parsed []
   let astsnbt = minecraftify ast
-  -- Give `succ` as `zero` to `main`. Temporary
-  let hackForNat = "[0,[0," ++ astsnbt ++ ",[5]],[4,0]]"
   -- Map of shared trees
   let shared = findReference ast
   -- SNBT object containing all shared trees along with their indices
   let sharingsnbt = intercalate "," $ map (\(num, indirectTree) -> show num ++ ":" ++ minecraftify indirectTree) (toList shared)
-  putStrLn $ "data modify storage lambda:lambda current set value " ++ hackForNat
+  putStrLn $ "data modify storage lambda:lambda current set value " ++ astsnbt
   putStrLn $ "data modify storage lambda:lambda sharing set value {" ++ sharingsnbt ++ "}"
   return ()

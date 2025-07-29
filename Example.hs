@@ -22,9 +22,9 @@ mul Zero b = Zero
 mul (Succ a) b = (a `mul` b) `add` b
 
 -- Takes a Nat, a succ function and a zero value and returns the accumulated value
-mcNatify :: Nat -> (a -> a) -> a -> a
-mcNatify Zero s z = z
-mcNatify (Succ prev) s z = s $ mcNatify prev s z
+mcNatify :: Nat -> a
+mcNatify Zero = _primitive "zero"
+mcNatify (Succ prev) = _primitive "succ" $ mcNatify prev
 
 fac :: Nat -> Nat
 fac Zero = one
