@@ -22,3 +22,7 @@ execute if score tag lambda matches 24 run return run function lambda:swaps/add
 execute if score tag lambda matches 25 run return run function lambda:swaps/mul
 execute if score tag lambda matches 26 run return run function lambda:swaps/sub
 execute if score tag lambda matches 27 run return run function lambda:swaps/eq
+execute if score tag lambda matches 28 run return run function lambda:swaps/le
+execute if score tag lambda matches 29 run return run function lambda:swaps/lt
+execute if score tag lambda matches 30 run return run function lambda:swaps/ge
+execute if score tag lambda matches 31 run return run function lambda:swaps/gt
