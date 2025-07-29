@@ -1,0 +1,1 @@
+$data modify storage lambda:lambda sharing.$(index) set from storage lambda:lambda current
