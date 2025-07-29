@@ -26,3 +26,4 @@ execute if score tag lambda matches 28 run return run function lambda:swaps/le
 execute if score tag lambda matches 29 run return run function lambda:swaps/lt
 execute if score tag lambda matches 30 run return run function lambda:swaps/ge
 execute if score tag lambda matches 31 run return run function lambda:swaps/gt
+execute if score tag lambda matches 32 run return run function lambda:swaps/seq

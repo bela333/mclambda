@@ -2,7 +2,6 @@
 data modify storage lambda:lambda current set from storage lambda:lambda current[2]
 # eval
 function lambda:eval
-# reset rewinding, just in case
 scoreboard players set rewinding lambda 0
 scoreboard players set rewindsteps lambda 0
 

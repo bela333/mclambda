@@ -62,6 +62,7 @@ scoreboard players set num2 lambda 0
 # lt: 29
 # ge: 30
 # gt: 31
+# seq: 32
 
 function lambda:setup
 

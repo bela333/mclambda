@@ -3,11 +3,15 @@ data modify storage lambda:lambda stack prepend from storage lambda:lambda curre
 # evaluate first argument
 data modify storage lambda:lambda current set from storage lambda:lambda current[1][2]
 function lambda:eval
+scoreboard players set rewinding lambda 0
+scoreboard players set rewindsteps lambda 0
 # save result for later. Stack: [first result, second argument]
 data modify storage lambda:lambda stack prepend from storage lambda:lambda current
 # evaluate second argument
 data modify storage lambda:lambda current set from storage lambda:lambda stack[1]
 function lambda:eval
+scoreboard players set rewinding lambda 0
+scoreboard players set rewindsteps lambda 0
 
 # Check types
 execute store result score num1 lambda run data get storage lambda:lambda stack[0][0]
@@ -27,4 +31,4 @@ execute unless score num1 lambda >= num2 lambda run data modify storage lambda:l
 data remove storage lambda:lambda stack[0]
 data remove storage lambda:lambda stack[0]
 
-function lambda:eval
+return 1
