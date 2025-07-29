@@ -1,7 +1,7 @@
 module Example where
 
-fac :: Int -> Int
-fac 0 = 1
-fac n = n * (fac $ n - 1)
+fastfib :: Int -> Int -> Int -> Int
+fastfib a b 0 = a
+fastfib a b n = fastfib b (a + b) (n - 1)
 
-main = if (3 :: Int) > 2 then 1 :: Int else 0 :: Int
+main = fastfib 0 1 15
