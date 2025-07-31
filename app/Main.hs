@@ -145,6 +145,15 @@ minecraftify (Comb "seq") = "[32]"
 minecraftify (Comb l) = "[23, " ++ show l ++ "]"
 minecraftify (StringNode str) = "[23, " ++ show ("Tried decoding string: " ++ str) ++ "]"
 
+filePrefix :: String
+filePrefix =
+  "scoreboard players set rewinding lambda 0\n"
+    ++ "scoreboard players set rewindsteps lambda 0\n"
+    ++ "data remove storage lambda:lambda stack"
+
+fileSuffix :: String
+fileSuffix = "function lambda:instrumented_eval"
+
 main :: IO ()
 main = do
   args <- getArgs
@@ -162,7 +171,7 @@ main = do
       let currentcmb = "data modify storage lambda:lambda current set value " ++ astsnbt
       let sharingcmb = "data modify storage lambda:lambda sharing set value {" ++ sharingsnbt ++ "}"
       case args of
-        (_ : outputPath : _) -> writeFile outputPath (currentcmb ++ "\n" ++ sharingcmb)
+        (_ : outputPath : _) -> writeFile outputPath (filePrefix ++ "\n" ++ currentcmb ++ "\n" ++ sharingcmb ++ "\n" ++ fileSuffix)
         _ -> do
           putStrLn currentcmb
           putStrLn sharingcmb
