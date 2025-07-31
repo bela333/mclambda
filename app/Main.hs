@@ -113,7 +113,9 @@ minecraftify (Reference num _) = "[22, " ++ show num ++ "]"
 minecraftify (Comb "S") = "[1]"
 minecraftify (Comb "K") = "[2]"
 minecraftify (Comb "I") = "[3]"
-minecraftify (Number num) = "[4, " ++ show num ++ "]"
+minecraftify (Number num)
+  | num > 2147483647 = "[4, " ++ show (num - 4294967296) ++ "]"
+  | otherwise = "[4, " ++ show num ++ "]"
 minecraftify (Comb "zero") = "[4, 0]"
 minecraftify (Comb "succ") = "[5]"
 minecraftify (Comb "S'") = "[6]"
@@ -141,6 +143,16 @@ minecraftify (Comb "<") = "[29]"
 minecraftify (Comb ">=") = "[30]"
 minecraftify (Comb ">") = "[31]"
 minecraftify (Comb "seq") = "[32]"
+-- Extremely loud incorrect buzzer. TODO: Minecraft`s rem behaves like Haskell`s mod for negative numbers
+-- minecraftify (Comb "rem") = "[33]"
+minecraftify (Comb "urem") = "[33]"
+minecraftify (Comb "shr") = "[34]"
+minecraftify (Comb "inv") = "[35]"
+minecraftify (Comb "ashr") = "[36]"
+minecraftify (Comb "shl") = "[37]"
+minecraftify (Comb "and") = "[38]"
+minecraftify (Comb "quot") = "[39]"
+minecraftify (Comb "uquot") = "[39]"
 -- minecraftify (Comb l) = error $ "Unknown literal: \"" ++ l ++ "\""
 minecraftify (Comb l) = "[23, " ++ show l ++ "]"
 minecraftify (StringNode str) = "[23, " ++ show ("Tried decoding string: " ++ str) ++ "]"
@@ -152,7 +164,9 @@ filePrefix =
     ++ "data remove storage lambda:lambda stack"
 
 fileSuffix :: String
-fileSuffix = "function lambda:instrumented_eval"
+fileSuffix =
+  "tellraw @a \"Running...\"\n"
+    ++ "function lambda:instrumented_eval"
 
 main :: IO ()
 main = do
