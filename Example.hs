@@ -27,6 +27,4 @@ matrixfib n = r
   mx = Matrix 1 1 1 0
 
 main :: Int
-main = 3 ^ 2
-
--- main = 1 `primWordShl` 2
+main = matrixfib 8
