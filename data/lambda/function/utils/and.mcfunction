@@ -1,3 +1,4 @@
+#Input: num1, num2. Result: num6
 scoreboard players set num6 lambda 0
 
 # Bit 0

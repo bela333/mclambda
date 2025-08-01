@@ -68,13 +68,14 @@ scoreboard players set TWO lambda 2
 # ge: 30
 # gt: 31
 # seq: 32
-# rem: 33
+# urem: 33
 # shr: 34
 # inv: 35
 # ashr: 36
 # shl: 37
 # and: 38
 # quot: 39
+# rem: 40
 
 # To make sure your datapack is working, a load message can be useful.
 tellraw @a { "color": "#00FF00", "text": "The Code is Load"}
