@@ -33,3 +33,10 @@ execute if score tag lambda matches 29 run return run function lambda:evals/two
 execute if score tag lambda matches 30 run return run function lambda:evals/two
 execute if score tag lambda matches 31 run return run function lambda:evals/two
 execute if score tag lambda matches 32 run return run function lambda:evals/two
+execute if score tag lambda matches 33 run return run function lambda:evals/two
+execute if score tag lambda matches 34 run return run function lambda:evals/two
+execute if score tag lambda matches 35 run return run function lambda:evals/one
+execute if score tag lambda matches 36 run return run function lambda:evals/two
+execute if score tag lambda matches 37 run return run function lambda:evals/two
+execute if score tag lambda matches 38 run return run function lambda:evals/two
+execute if score tag lambda matches 39 run return run function lambda:evals/two

@@ -16,15 +16,15 @@ scoreboard players set rewindsteps lambda 0
 # Check types
 execute store result score num1 lambda run data get storage lambda:lambda stack[0][0]
 execute store result score num2 lambda run data get storage lambda:lambda current[0]
-execute unless score num1 lambda matches 4 run tellraw @a "first argument of `sub` was not a number"
-execute unless score num2 lambda matches 4 run tellraw @a "second argument of `sub` was not a number"
+execute unless score num1 lambda matches 4 run tellraw @a "first argument of `shr` was not a number"
+execute unless score num2 lambda matches 4 run tellraw @a "second argument of `shr` was not a number"
 execute unless score num1 lambda matches 4 run return fail
 execute unless score num2 lambda matches 4 run return fail
 
 # Do calculation
 execute store result score num1 lambda run data get storage lambda:lambda stack[0][1]
 execute store result score num2 lambda run data get storage lambda:lambda current[1]
-scoreboard players operation num1 lambda -= num2 lambda
+function lambda:utils/shift_right_word
 
 # store result
 data modify storage lambda:lambda current set value [4, 0]

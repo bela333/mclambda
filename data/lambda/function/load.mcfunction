@@ -29,6 +29,11 @@ scoreboard players set rewindsteps lambda 0
 scoreboard players set temp lambda 0
 scoreboard players set num1 lambda 0
 scoreboard players set num2 lambda 0
+scoreboard players set num3 lambda 0
+scoreboard players set num4 lambda 0
+scoreboard players set num5 lambda 0
+scoreboard players set num6 lambda 0
+scoreboard players set TWO lambda 2
 
 # ap : 0
 # S : 1
@@ -63,8 +68,13 @@ scoreboard players set num2 lambda 0
 # ge: 30
 # gt: 31
 # seq: 32
-
-function lambda:setup
+# rem: 33
+# shr: 34
+# inv: 35
+# ashr: 36
+# shl: 37
+# and: 38
+# quot: 39
 
 # To make sure your datapack is working, a load message can be useful.
 tellraw @a { "color": "#00FF00", "text": "The Code is Load"}

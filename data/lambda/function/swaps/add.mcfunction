@@ -33,3 +33,4 @@ execute store result storage lambda:lambda current[1] int 1 run scoreboard playe
 # restore stack
 data remove storage lambda:lambda stack[0]
 data remove storage lambda:lambda stack[0]
+return 1

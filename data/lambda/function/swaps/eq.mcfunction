@@ -16,6 +16,7 @@ scoreboard players set rewindsteps lambda 0
 # Check types
 execute store result score num1 lambda run data get storage lambda:lambda stack[0][0]
 execute store result score num2 lambda run data get storage lambda:lambda current[0]
+execute unless score num1 lambda matches 4 run tellraw @a {storage:"lambda:lambda", nbt:"stack[0]"}
 execute unless score num1 lambda matches 4 run tellraw @a "first argument of `eq` was not a number"
 execute unless score num2 lambda matches 4 run tellraw @a "second argument of `eq` was not a number"
 execute unless score num1 lambda matches 4 run return fail

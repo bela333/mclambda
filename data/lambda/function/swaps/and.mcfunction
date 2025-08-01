@@ -16,19 +16,19 @@ scoreboard players set rewindsteps lambda 0
 # Check types
 execute store result score num1 lambda run data get storage lambda:lambda stack[0][0]
 execute store result score num2 lambda run data get storage lambda:lambda current[0]
-execute unless score num1 lambda matches 4 run tellraw @a "first argument of `sub` was not a number"
-execute unless score num2 lambda matches 4 run tellraw @a "second argument of `sub` was not a number"
+execute unless score num1 lambda matches 4 run tellraw @a "first argument of `and` was not a number"
+execute unless score num2 lambda matches 4 run tellraw @a "second argument of `and` was not a number"
 execute unless score num1 lambda matches 4 run return fail
 execute unless score num2 lambda matches 4 run return fail
 
 # Do calculation
 execute store result score num1 lambda run data get storage lambda:lambda stack[0][1]
 execute store result score num2 lambda run data get storage lambda:lambda current[1]
-scoreboard players operation num1 lambda -= num2 lambda
+function lambda:utils/and
 
 # store result
 data modify storage lambda:lambda current set value [4, 0]
-execute store result storage lambda:lambda current[1] int 1 run scoreboard players get num1 lambda
+execute store result storage lambda:lambda current[1] int 1 run scoreboard players get num6 lambda
 
 # restore stack
 data remove storage lambda:lambda stack[0]
