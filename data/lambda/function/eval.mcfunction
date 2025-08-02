@@ -41,3 +41,4 @@ execute if score tag lambda matches 37 run return run function lambda:evals/two
 execute if score tag lambda matches 38 run return run function lambda:evals/two
 execute if score tag lambda matches 39 run return run function lambda:evals/two
 execute if score tag lambda matches 40 run return run function lambda:evals/two
+execute if score tag lambda matches 41 run return run function lambda:evals/two

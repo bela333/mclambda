@@ -16,8 +16,8 @@ scoreboard players set rewindsteps lambda 0
 # Check types
 execute store result score num1 lambda run data get storage lambda:lambda stack[0][0]
 execute store result score num2 lambda run data get storage lambda:lambda current[0]
-execute unless score num1 lambda matches 4 run tellraw @a "first argument of `urem` was not a number"
-execute unless score num2 lambda matches 4 run tellraw @a "second argument of `urem` was not a number"
+execute unless score num1 lambda matches 4 run tellraw @a "first argument of `uquot` was not a number"
+execute unless score num2 lambda matches 4 run tellraw @a "second argument of `uquot` was not a number"
 execute unless score num1 lambda matches 4 run return fail
 execute unless score num2 lambda matches 4 run return fail
 
@@ -28,7 +28,7 @@ function lambda:hmmm/divmod/main
 
 # store result
 data modify storage lambda:lambda current set value [4, 0]
-execute store result storage lambda:lambda current[1] int 1 run scoreboard players get num4 lambda
+execute store result storage lambda:lambda current[1] int 1 run scoreboard players get num3 lambda
 
 # restore stack
 data remove storage lambda:lambda stack[0]
