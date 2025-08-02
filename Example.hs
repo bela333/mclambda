@@ -27,4 +27,4 @@ matrixfib n = r
   mx = Matrix 1 1 1 0
 
 main :: Int
-main = matrixfib 8
+main = matrixfib 10
