@@ -46,12 +46,15 @@ setter a l b = modifier l (const b) a
 getter :: a -> Lens a b -> b
 getter a l = getConst $ l Const a
 
+zoom :: Lens st st' -> State st' a -> State st a
+zoom l s = State $ \state -> let (s', v) = runState s (getter state l) in (setter state l s', v)
+
 fibState :: Int -> State FibState Int
 fibState n = do
   forM_ [1 .. n] $ \_ -> do
-    modify (\(FibState p c) -> (FibState c (c + p)))
+    modify $ \(FibState p c) -> (FibState c (c + p))
   s <- get
-  return $ getter s prevNum
+  zoom prevNum get
 
 main :: Int
 main = evalState (fibState 7) (FibState 0 1)
