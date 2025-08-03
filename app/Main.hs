@@ -183,12 +183,14 @@ main = do
       let astsnbt = minecraftify ast
       -- Map of shared trees
       let shared = findReference ast
+      let allocationindex = (+ 1) $ maximum $ map fst $ toList shared
       -- SNBT object containing all shared trees along with their indices
       let sharingsnbt = intercalate "," $ map (\(num, indirectTree) -> show num ++ ":" ++ minecraftify indirectTree) (toList shared)
       let currentcmb = "data modify storage lambda:lambda current set value " ++ astsnbt
       let sharingcmb = "data modify storage lambda:lambda sharing set value {" ++ sharingsnbt ++ "}"
+      let allocationcmd = "scoreboard players set allocationindex lambda " ++ show allocationindex
       case args of
-        (_ : outputPath : _) -> writeFile outputPath (filePrefix ++ "\n" ++ currentcmb ++ "\n" ++ sharingcmb ++ "\n" ++ fileSuffix)
+        (_ : outputPath : _) -> writeFile outputPath $ intercalate "\n" [filePrefix, currentcmb, sharingcmb, allocationcmd, fileSuffix]
         _ -> do
           putStrLn currentcmb
           putStrLn sharingcmb
