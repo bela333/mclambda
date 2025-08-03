@@ -37,3 +37,6 @@ execute if score tag lambda matches 39 run return run function lambda:swaps/quot
 execute if score tag lambda matches 40 run return run function lambda:swaps/rem
 execute if score tag lambda matches 41 run return run function lambda:swaps/uquot
 execute if score tag lambda matches 42 run return run function lambda:swaps/ucmp
+execute if score tag lambda matches 43 run return run function lambda:swaps/neg
+execute if score tag lambda matches 44 run return run function lambda:swaps/io
+execute if score tag lambda matches 45 run return run function lambda:swaps/icmp

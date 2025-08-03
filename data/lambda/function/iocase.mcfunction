@@ -1,0 +1,1 @@
+$function lambda:io/$(effectname)

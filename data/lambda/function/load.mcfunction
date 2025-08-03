@@ -16,7 +16,7 @@ time set 6000
 
 scoreboard objectives remove lambda
 scoreboard objectives add lambda dummy
-scoreboard objectives setdisplay sidebar lambda
+scoreboard objectives setdisplay sidebar
 
 data remove storage lambda:lambda current
 data remove storage lambda:lambda stack
@@ -78,6 +78,8 @@ scoreboard players set TWO lambda 2
 # rem: 40
 # uquot: 41
 # ucmp: 42
+# neg: 43
+# io: 44
 
 # To make sure your datapack is working, a load message can be useful.
 tellraw @a { "color": "#00FF00", "text": "The Code is Load"}
