@@ -4,7 +4,6 @@ module Main where
 
 import Data.List (intercalate)
 import Data.Map (Map, empty, insert, toList, union)
-import GHC.IO.Handle.Types (Handle__ (Handle__))
 import System.Environment (getArgs)
 import Text.Parsec hiding (tokens)
 import Text.Parsec.String (Parser, parseFromFile)
@@ -153,6 +152,10 @@ minecraftify (Comb "quot") = "[39]"
 minecraftify (Comb "rem") = "[40]"
 minecraftify (Comb "uquot") = "[41]"
 minecraftify (Comb "ucmp") = "[42]"
+minecraftify (Comb "neg") = "[43]"
+minecraftify (Comb "IO.>>=") = "[44, \"bind\"]"
+minecraftify (Comb "icmp") = "[45]"
+minecraftify (Comb ('I' : 'O' : '.' : ioname)) = "[44, " ++ show ioname ++ "]"
 -- minecraftify (Comb l) = error $ "Unknown literal: \"" ++ l ++ "\""
 minecraftify (Comb l) = "[23, " ++ show l ++ "]"
 minecraftify (StringNode str) = "[23, " ++ show ("Tried decoding string: " ++ str) ++ "]"
@@ -166,7 +169,7 @@ filePrefix =
 fileSuffix :: String
 fileSuffix =
   "tellraw @a \"Running...\"\n"
-    ++ "function lambda:instrumented_eval"
+    ++ "function lambda:instrumented_exec"
 
 main :: IO ()
 main = do
