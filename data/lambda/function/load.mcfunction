@@ -26,6 +26,7 @@ data remove storage lambda:lambda args
 
 scoreboard players set rewinding lambda 0
 scoreboard players set rewindsteps lambda 0
+scoreboard players set allocationindex lambda 0
 scoreboard players set temp lambda 0
 scoreboard players set num1 lambda 0
 scoreboard players set num2 lambda 0
